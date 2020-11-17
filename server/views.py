@@ -23,12 +23,11 @@ class CarListView(web.View):
         if not json_docs:
             return web.HTTPNotFound(text='No pages found!')
         return web.json_response(json_docs)
-        # return web.Response(status=200, body=json.dumps(json_docs), content_type='application/json')
 
     async def post(self):
         """
-        Create new car item
-        {'manufacturer': 'Toyota',
+        Create new car item. Following format is preferred:
+        {'brand': 'Toyota',
         'model': "Siena",
         'year': 2001,
         'color': "Blue",
@@ -41,8 +40,9 @@ class CarListView(web.View):
             if not result.inserted_id:
                 return web.HTTPNotFound(text='Could not create new item!')
         except errors.DuplicateKeyError as e:
-            return web.HTTPBadRequest(text=str(e))
-        return web.Response(status=201)
+            print(e)
+            return web.HTTPBadRequest(text="Document with such VIN number is already in DB. Error: " + str(e))
+        return web.Response(status=201, text='Successfully created!')
 
 
 class CarView(web.View):
@@ -70,8 +70,8 @@ class CarView(web.View):
             if not result.matched_count:
                 return web.HTTPNotFound(text='Could not create new item!')
         except Exception as e:
-            return web.HTTPBadRequest(text=str(e))
-        return web.Response(status=200)
+            return web.HTTPBadRequest(text="There is already a car with such VIN number. Error: " + str(e))
+        return web.Response(status=200, text="Successfully updated.")
 
     async def delete(self):
         """Delete car item"""
@@ -83,4 +83,4 @@ class CarView(web.View):
                 return web.HTTPBadRequest(text='Could not delete an item!')
         except Exception as e:
             return web.HTTPBadRequest(text=str(e))
-        return web.Response(status=200)
+        return web.Response(status=200, text="Item was deleted")
