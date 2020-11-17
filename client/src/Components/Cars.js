@@ -102,6 +102,7 @@ class AddCar extends React.Component {
         }).then(function(response) {
             return response.text()
         }).then(function(data) {
+            console.log(data);
             alert(data)
         });
     } catch(e) {

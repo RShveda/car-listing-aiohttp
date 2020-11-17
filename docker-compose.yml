@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: "mongo:latest"
+  api:
+    build: ./server
+    command: python main.py
+    volumes:
+      - ./server:/code/server
+    ports:
+      - "8080:8080"
+  make_db:
+    build: ./server
+    command: python generate_data.py
+    volumes:
+      - ./server:/code/server
+  react:
+    build: ./client
+    command: npm start
+    volumes:
+      - ./client:/code/client
+      - node-modules:/code/client/node_modules
+    ports:
+      - "3001:3000"
+    stdin_open: true
+volumes:
+  node-modules:
