@@ -8,7 +8,7 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import { Jumbotron, Container, Navbar, Nav } from 'react-bootstrap';
+import { Jumbotron, Container, Navbar, Nav, Button } from 'react-bootstrap';
 
 
 class App extends Component {
@@ -79,6 +79,13 @@ function Home() {
     <Container>
       <Jumbotron>
         <h1>This is a homepage</h1>
+        <p>Head to Cars page to see a list of cars:</p>
+        <Link to="/cars">
+         <Button variant="primary">
+           Cars List
+         </Button>
+        </Link>
+
       </Jumbotron>
     </Container>
   )

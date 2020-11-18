@@ -1,8 +1,18 @@
+"""
+Module that create a mongodb collection and pre-populate it with dummy data. Optionally it accepts Mongo DB
+host address as positional arg.
+"""
+
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
-async def generate_data():
-    db = AsyncIOMotorClient().car_list
+async def generate_data(db_host):
+    """
+    This func perform few operations: 1) create a DB named "car_list" 2) clear "cars" table (in case it exist)
+    3) creates unique index for "vin" attr 4) generate dummy data to populate db.car_list.cars
+    """
+    print(db_host)
+    db = AsyncIOMotorClient(db_host, 27017).car_list
     cars = db.cars
     await cars.drop()
     await cars.create_index("vin", name="vin", unique=True)
@@ -40,5 +50,13 @@ async def generate_data():
 
 if __name__ == '__main__':
     import asyncio
+    import sys
+
+    # resolving DB host
+    try:
+        host = sys.argv[1]
+    except IndexError:
+        host = '127.0.0.1'
+
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(generate_data())
+    loop.run_until_complete(generate_data(host))

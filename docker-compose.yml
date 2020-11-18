@@ -1,20 +1,25 @@
 version: "3.8"
-
 services:
   mongo:
     image: "mongo:latest"
+    ports:
+      - "27017-27019:27017-27019"
   api:
     build: ./server
-    command: python main.py
+    command: python main.py mongo
     volumes:
       - ./server:/code/server
     ports:
       - "8080:8080"
+    depends_on:
+      - mongo
   make_db:
     build: ./server
-    command: python generate_data.py
+    command: python generate_data.py mongo
     volumes:
       - ./server:/code/server
+    depends_on:
+      - mongo
   react:
     build: ./client
     command: npm start
