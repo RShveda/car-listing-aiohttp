@@ -39,7 +39,7 @@ class DeleteCarModal extends React.Component {
               <h4>Are you sure you wan to delete a car with vin: {this.state.vin}?</h4>
               <Form onSubmit={this.handleSubmit}>
                 <Button type="submit">Submit</Button>
-                <Button className="float-right" variant="danger" onClick={this.props.onHide}>Cancel</Button>
+                <Button className="float-right" variant="outline-danger" onClick={this.props.onHide}>Cancel</Button>
               </Form>
             </Modal.Body>
           </Modal>

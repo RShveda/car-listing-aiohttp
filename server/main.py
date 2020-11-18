@@ -23,6 +23,7 @@ try:
 except IndexError:
     db_host = 'localhost'
 
+
 loop = asyncio.get_event_loop()
 db = loop.run_until_complete(setup_db(db_host))
 app = web.Application(

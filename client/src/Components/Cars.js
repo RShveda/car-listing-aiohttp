@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Table, Container, Col, Form, Row } from 'react-bootstrap';
+import { Button, Table, Container, Form } from 'react-bootstrap';
 import DeleteCarModal from './DeleteCarModal';
 import { Link } from "react-router-dom";
 
@@ -9,8 +9,26 @@ class Cars extends Component{
     super(props);
     this.state = {
       deleteModals:{},
+      filter: "",
+      cars: [],
     };
+    this.handleResetFilter = this.handleResetFilter.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleFilterList = this.handleFilterList.bind(this);
     this.setDeleteModalShow = this.setDeleteModalShow.bind(this);
+  }
+
+  async componentDidMount(){
+    try {
+      const res = await fetch('http://localhost:8080/cars');
+      const data = await res.json();
+      const cars = JSON.parse(data)
+      this.setState({
+        cars
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   setDeleteModalShow(bool, id) {
@@ -19,44 +37,82 @@ class Cars extends Component{
     this.setState({deleteModals});
   }
 
+  handleChange(event) {
+    this.setState({[event.target.name]: event.target.value});
+  }
+
+  async handleResetFilter(event) {
+    await this.setState({filter:""});
+    await this.handleFilterList(event)
+  }
+
+  async handleFilterList(event) {
+    event.preventDefault()
+    const query = (this.state.filter ? ('?model=' + this.state.filter) : "")
+    try {
+      const res = await fetch('http://localhost:8080/cars' + query);
+      const data = await res.json();
+      const cars = JSON.parse(data)
+      this.setState({cars:cars});
+    } catch (e) {
+      console.log(e);
+    }
+
+  }
+
   render() {
     return (
       <Container>
+
         <h1>This is Cars list page!</h1>
         <h5>You may add a new car:</h5>
-        <AddCar />
+        <Link to="/cars/new">
+         <Button variant="primary">
+           New Car
+         </Button>
+        </Link>
+        <Form className="float-right" onSubmit={this.handleFilterList}>
+          <Form.Group>
+            <Form.Label>Filter by Car Model:</Form.Label>
+            <Form.Control type="text" value={this.state.filter} name ="filter" onChange={this.handleChange} />
+            <Button className="Button" type="submit">Filter</Button>
+            <Button className="float-right" className="Button" variant="secondary" onClick={this.handleResetFilter}>Reset Filter</Button>
+          </Form.Group>
+        </Form>
+
+        <br/>
         <br/>
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>VIN</th>
               <th>Brand</th>
               <th>Model</th>
               <th>Year</th>
               <th>Color</th>
-              <th>VIN</th>
+              <th>ID</th>
               <th>Actions</th>
             </tr>
           </thead>
             <tbody>
-             {this.props.data.cars.map(item => (
+             {this.state.cars.map(item => (
                <tr key={item._id.$oid}>
-                 <td>{item._id.$oid}</td>
+                 <td>{item.vin}</td>
                  <td>{item.brand}</td>
                  <td>{item.model}</td>
                  <td>{item.year}</td>
                  <td>{item.color}</td>
-                 <td>{item.vin}</td>
+                 <td>{item._id.$oid}</td>
                  <td>
                    <Link to={{
                       pathname: `car/${item._id.$oid}/edit`,
                       state: { brand: item.brand, model: item.model, _id: item._id.$oid, vin: item.vin, }
                      }}>
-                    <Button variant="primary">
+                    <Button variant="primary" className="Button">
                       View Record
                     </Button>
                    </Link>
-                   <Button variant="danger" onClick={() => this.setDeleteModalShow(true, item._id.$oid)}>
+                   <Button variant="danger" className="Button" onClick={() => this.setDeleteModalShow(true, item._id.$oid)}>
                     Delete Car
                    </Button>
                    <DeleteCarModal
@@ -70,78 +126,6 @@ class Cars extends Component{
              </tbody>
          </Table>
       </Container>
-    );
-  }
-}
-
-class AddCar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      brand: '',
-      model: '',
-      vin: '',
-    };
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleChange(event) {
-    this.setState({[event.target.name]: event.target.value});
-  }
-
-  handleSubmit(event) {
-    try {
-      fetch('http://localhost:8080/cars', {
-          method: 'POST',
-          body: JSON.stringify(this.state),
-          headers: {
-            'Content-Type': 'application/json'
-          },
-        }).then(function(response) {
-            return response.text()
-        }).then(function(data) {
-            console.log(data);
-            alert(data)
-        });
-    } catch(e) {
-      alert(e)
-    }
-
-  }
-
-  render() {
-    return (
-        <Form onSubmit={this.handleSubmit}>
-        <Row>
-          <Col lg={4}>
-            <Form.Group>
-              <Form.Label>Car brand:</Form.Label>
-              <Form.Control type="text" value={this.state.brand} name ="brand" onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Car model:</Form.Label>
-              <Form.Control type="text" value={this.state.model} name ="model" onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Car VIN# (*required):</Form.Label>
-              <Form.Control type="text" required value={this.state.vin} name ="vin" onChange={this.handleChange} />
-            </Form.Group>
-          </Col>
-          <Col lg={4}>
-            <Form.Group>
-              <Form.Label>Car color:</Form.Label>
-              <Form.Control type="text" value={this.state.color} name ="color" onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Car year:</Form.Label>
-              <Form.Control type="number" value={this.state.year} name ="year" onChange={this.handleChange} />
-            </Form.Group>
-          </Col>
-          </Row>
-          <Button type="submit">Submit</Button>
-        </Form>
     );
   }
 }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Cars from './Components/Cars';
 import EditCarPage from './Components/EditCarPage';
+import NewCarPage from './Components/NewCarPage';
 import {
   BrowserRouter as Router,
   Switch,
@@ -19,7 +20,6 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.setCarState = this.setCarState.bind(this);
   }
 
   async componentDidMount() {
@@ -33,10 +33,6 @@ class App extends Component {
     } catch (e) {
       console.log(e);
     }
-  }
-
-  setCarState(car){
-    console.log("car");
   }
 
   render() {
@@ -59,7 +55,10 @@ class App extends Component {
               renders the first one that matches the current URL. */}
           <Switch>
             <Route exact path="/cars">
-              <Cars data = {this.state}/>
+              <Cars />
+            </Route>
+            <Route exact path="/cars/new">
+              <NewCarPage />
             </Route>
             <Route path="/car/:carId/edit">
               <EditCarPage cars = {this.state.cars} />
